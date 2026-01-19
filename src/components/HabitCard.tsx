@@ -210,27 +210,6 @@ export function HabitCard({ habit }: HabitCardProps) {
                   </div>
                 </div>
 
-                {/* XP Progress Bar */}
-                {stats && stats.nextStage && (
-                  <div className="mb-3">
-                    <div className="mb-1 flex items-center justify-between text-xs text-gray-900 dark:text-white">
-                      <span>{stats.currentStage.name}</span>
-                      <span>{Math.round(stats.xpProgress)}%</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                      <motion.div
-                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${stats.xpProgress}%` }}
-                        transition={{ duration: 0.5, ease: 'easeOut' }}
-                      />
-                    </div>
-                    <div className="mt-1 text-xs text-gray-900 dark:text-white">
-                      Next: {stats.nextStage.name}
-                    </div>
-                  </div>
-                )}
-
                 {/* Complete Button */}
                 <Button
                   onClick={handleComplete}

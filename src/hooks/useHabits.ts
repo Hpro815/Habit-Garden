@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { habitStorage, completionStorage } from '@/lib/storage';
 import type { Habit } from '@/types/habit';
-import { XP_PER_COMPLETION, XP_STREAK_BONUS, GROWTH_STAGES } from '@/types/habit';
+import { GROWTH_STAGES } from '@/types/habit';
 
 // Health decay constants
 const HEALTH_DECAY_PER_DAY = 15; // Lose 15 health per missed day
@@ -151,28 +151,21 @@ export function useCompleteHabit() {
         newStreak = 1;
       }
 
-      // Calculate XP gain
-      const baseXP = XP_PER_COMPLETION;
-      const streakBonus = newStreak > 1 ? XP_STREAK_BONUS : 0;
-      const totalXPGained = baseXP + streakBonus;
-
-      // Calculate new XP and stage
-      const newXP = habit.xp + totalXPGained;
+      // Calculate new stage based on total completions
+      const completions = completionStorage.getByHabitId(habitId);
+      const totalCompletions = completions.length + 1; // +1 for current completion
       let newStage = habit.currentStage;
 
-      // Check if leveled up
-      for (let i = GROWTH_STAGES.length - 1; i >= 0; i--) {
-        if (newXP >= GROWTH_STAGES[i].xpRequired) {
-          newStage = GROWTH_STAGES[i].stage;
-          break;
-        }
+      // Progress through stages based on completions (roughly every 7 completions = 1 stage)
+      const stageFromCompletions = Math.min(7, Math.floor(totalCompletions / 7));
+      if (stageFromCompletions > newStage) {
+        newStage = stageFromCompletions;
       }
 
       // Create completion record
       const completion = completionStorage.create({
         habitId,
         completedAt: now,
-        xpGained: totalXPGained,
         notes,
       });
 
@@ -182,7 +175,6 @@ export function useCompleteHabit() {
 
       // Update habit
       const updatedHabit = habitStorage.update(habitId, {
-        xp: newXP,
         currentStage: newStage,
         streakCount: newStreak,
         lastCompletedAt: now,
@@ -193,7 +185,6 @@ export function useCompleteHabit() {
         habit: updatedHabit,
         completion,
         leveledUp: newStage > habit.currentStage,
-        xpGained: totalXPGained,
         healthRestored: newHealth - currentHealth,
       };
     },
@@ -221,7 +212,6 @@ export function useReviveHabit() {
         health: 50,
         isDead: false,
         currentStage: 0,
-        xp: 0,
         streakCount: 0,
         lastCompletedAt: new Date(),
       });
@@ -261,12 +251,9 @@ export function useHabitStats(habitId: string) {
         return completionDate.getTime() === today.getTime();
       });
 
-      // Calculate next stage info
+      // Calculate stage info
       const currentStage = GROWTH_STAGES[habit.currentStage];
       const nextStage = GROWTH_STAGES[habit.currentStage + 1];
-      const xpProgress = nextStage
-        ? ((habit.xp - currentStage.xpRequired) / (nextStage.xpRequired - currentStage.xpRequired)) * 100
-        : 100;
 
       return {
         habit,
@@ -275,7 +262,6 @@ export function useHabitStats(habitId: string) {
         totalCompletions: completions.length,
         currentStage,
         nextStage,
-        xpProgress: Math.min(100, Math.max(0, xpProgress)),
       };
     },
     enabled: !!habitId,

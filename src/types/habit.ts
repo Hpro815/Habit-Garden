@@ -65,7 +65,6 @@ export interface Habit {
   reminderEnabled: boolean;
   reminderTime?: string; // Format: "HH:MM"
   currentStage: number; // 0-7 growth stages
-  xp: number; // Experience points
   streakCount: number;
   lastCompletedAt?: Date;
   createdAt: Date;
@@ -80,7 +79,6 @@ export interface Completion {
   id: string;
   habitId: string;
   completedAt: Date;
-  xpGained: number;
   notes?: string;
   createdAt: Date;
 }
@@ -145,10 +143,6 @@ export const FLOWER_STAGE_NAMES: Record<FlowerType, string[]> = {
   buttercup: ['Seed', 'Sprout', 'Leaves', 'Stem', 'Budding', 'Opening', 'Full Bloom', 'Buttercup Meadow'],
   cornflower: ['Seed', 'Sprout', 'Seedling', 'Stem', 'Budding', 'Opening', 'Full Bloom', 'Cornflower Field'],
 };
-
-// XP rewards
-export const XP_PER_COMPLETION = 25;
-export const XP_STREAK_BONUS = 10; // Additional XP for maintaining streaks
 
 // Premium features
 export interface PremiumFeature {

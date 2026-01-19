@@ -38,49 +38,49 @@ const tutorialSteps = [
     ),
   },
   {
-    title: 'Complete Daily, Earn XP',
+    title: 'Complete Daily, Grow Your Flower',
     description: 'Each completion helps your flower grow',
     icon: Target,
     content: (
       <div className="flex flex-col items-center gap-4">
         <p className="text-center text-gray-900 dark:text-white">
-          Tap the "Complete" button each time you finish your habit to earn XP!
+          Tap the "Complete" button each time you finish your habit to help your flower grow!
         </p>
         <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-800/30 dark:to-pink-800/30 p-6 rounded-lg">
           <div className="text-center space-y-2">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-300">+25 XP</div>
-            <div className="text-sm text-gray-900 dark:text-white">Base completion reward</div>
-            <div className="text-lg font-semibold text-pink-600 dark:text-pink-300">+10 XP</div>
-            <div className="text-sm text-gray-900 dark:text-white">Streak bonus!</div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-300">Complete daily</div>
+            <div className="text-sm text-gray-900 dark:text-white">Watch your flower bloom</div>
+            <div className="text-lg font-semibold text-pink-600 dark:text-pink-300">Build streaks</div>
+            <div className="text-sm text-gray-900 dark:text-white">Keep your flower healthy!</div>
           </div>
         </div>
       </div>
     ),
   },
   {
-    title: 'Build Streaks for Bonuses',
-    description: 'Consecutive days = extra XP',
+    title: 'Build Streaks',
+    description: 'Consecutive days = healthy flowers',
     icon: TrendingUp,
     content: (
       <div className="flex flex-col items-center gap-4">
         <p className="text-center text-gray-900 dark:text-white">
-          Complete your habit multiple days in a row to build a streak and earn bonus XP!
+          Complete your habit multiple days in a row to build a streak and keep your flower healthy!
         </p>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="bg-orange-50 dark:bg-orange-900/30 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
             <div className="text-2xl">🔥</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-white">1 Day</div>
-            <div className="text-xs text-gray-900 dark:text-white">+25 XP</div>
+            <div className="text-xs text-gray-900 dark:text-white">Started!</div>
           </div>
           <div className="bg-orange-100 dark:bg-orange-900/50 p-3 rounded-lg border-2 border-orange-300 dark:border-orange-700">
             <div className="text-2xl">🔥🔥</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-white">3 Days</div>
-            <div className="text-xs text-gray-900 dark:text-white">+35 XP</div>
+            <div className="text-xs text-gray-900 dark:text-white">Growing!</div>
           </div>
           <div className="bg-orange-200 dark:bg-orange-900/70 p-3 rounded-lg border-2 border-orange-400 dark:border-orange-600">
             <div className="text-2xl">🔥🔥🔥</div>
             <div className="text-sm font-semibold text-gray-900 dark:text-white">7 Days</div>
-            <div className="text-xs text-gray-900 dark:text-white">+35 XP</div>
+            <div className="text-xs text-gray-900 dark:text-white">Thriving!</div>
           </div>
         </div>
       </div>
@@ -137,7 +137,7 @@ const tutorialSteps = [
           <div className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">Quick Tips:</div>
           <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
             <li>• Complete habits daily for best results</li>
-            <li>• Build streaks for bonus XP</li>
+            <li>• Build streaks to keep flowers healthy</li>
             <li>• Free plan: 10 habits/month, limited flower types</li>
             <li>• Premium: Unlimited habits, all flower types</li>
           </ul>

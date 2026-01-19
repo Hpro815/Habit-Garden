@@ -142,7 +142,6 @@ export function CreateHabitDialog({ open, onOpenChange }: CreateHabitDialogProps
         ...data,
         colorPalette: 'pastel-green', // Default color palette
         currentStage: 0,
-        xp: 0,
         streakCount: 0,
         health: 100,
         isDead: false,
