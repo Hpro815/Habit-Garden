@@ -3,9 +3,9 @@ export type PricingPlan = 'monthly' | 'yearly' | 'onetime';
 
 // Stripe Payment Links
 export const PAYMENT_LINKS: Record<PricingPlan, string> = {
-  monthly: 'https://buy.stripe.com/test_4gMbJ1drcfjwcTMfQ51oI00',
-  yearly: 'https://buy.stripe.com/test_4gMbJ1bj40oCdXQ8nD1oI01',
-  onetime: 'https://buy.stripe.com/test_6oU00j72O7R44ngfQ51oI02',
+  monthly: 'https://buy.stripe.com/aFa4gA2s6dGV6Ai4HW14402',
+  yearly: 'https://buy.stripe.com/dRmaEY5Ei7ix1fY4HW14401',
+  onetime: 'https://buy.stripe.com/4gM7sMgiW32he2Ka2g14400',
 };
 
 // Start checkout by redirecting to Stripe Payment Link
@@ -44,7 +44,7 @@ export const PRICING_INFO: PricingInfo[] = [
   {
     plan: 'onetime',
     label: 'Lifetime',
-    price: '$20.99',
+    price: '$20.00',
     period: 'one-time',
     savings: 'Best value',
   },

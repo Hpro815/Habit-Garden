@@ -1,5 +1,5 @@
 import { habitStorage, userPrefsStorage } from './storage';
-import { isPremiumTheme, FREE_HABIT_LIMIT_PER_MONTH } from '@/types/habit';
+import { isPremiumTheme, FREE_HABIT_LIMIT_PER_MONTH, MAX_AD_TRIES, ADS_PER_SLOT } from '@/types/habit';
 import type { ThemeType } from '@/types/habit';
 
 // Get current month in YYYY-MM format
@@ -15,8 +15,37 @@ export function getHabitsCreatedThisMonth(): number {
   return habits.filter((habit) => habit.createdMonth === currentMonth).length;
 }
 
+// Get total habit limit including ad-earned slots
+export function getTotalHabitLimit(): number {
+  const userPrefs = userPrefsStorage.get();
+  const adEarnedSlots = userPrefs.adEarnedSlots ?? 0;
+  return FREE_HABIT_LIMIT_PER_MONTH + adEarnedSlots;
+}
+
+// Check if user can watch ads for extra slots
+export function canWatchAdsForSlots(): { allowed: boolean; triesRemaining: number } {
+  const userPrefs = userPrefsStorage.get();
+  const adTriesUsed = userPrefs.adTriesUsed ?? 0;
+  const triesRemaining = MAX_AD_TRIES - adTriesUsed;
+  return {
+    allowed: triesRemaining > 0,
+    triesRemaining,
+  };
+}
+
+// Add an extra habit slot from watching ads
+export function addAdEarnedSlot(): void {
+  const userPrefs = userPrefsStorage.get();
+  const currentSlots = userPrefs.adEarnedSlots ?? 0;
+  const currentTries = userPrefs.adTriesUsed ?? 0;
+  userPrefsStorage.update({
+    adEarnedSlots: currentSlots + 1,
+    adTriesUsed: currentTries + 1,
+  });
+}
+
 // Check if user can create more habits
-export function canCreateHabit(): { allowed: boolean; reason?: string } {
+export function canCreateHabit(): { allowed: boolean; reason?: string; canWatchAds?: boolean } {
   const userPrefs = userPrefsStorage.get();
 
   // Premium users have no limits
@@ -24,17 +53,24 @@ export function canCreateHabit(): { allowed: boolean; reason?: string } {
     return { allowed: true };
   }
 
-  // Free users: check monthly limit
+  // Free users: check monthly limit including ad-earned slots
   const habitsThisMonth = getHabitsCreatedThisMonth();
-  if (habitsThisMonth >= FREE_HABIT_LIMIT_PER_MONTH) {
+  const totalLimit = getTotalHabitLimit();
+
+  if (habitsThisMonth >= totalLimit) {
+    const adCheck = canWatchAdsForSlots();
     return {
       allowed: false,
-      reason: `Free plan limit reached (${FREE_HABIT_LIMIT_PER_MONTH} habits/month). Upgrade to Premium for unlimited habits!`,
+      reason: `Free plan limit reached (${totalLimit} habits/month). ${adCheck.allowed ? 'Watch ads for an extra slot or upgrade to Premium!' : 'Upgrade to Premium for unlimited habits!'}`,
+      canWatchAds: adCheck.allowed,
     };
   }
 
   return { allowed: true };
 }
+
+// Export constants for use in components
+export { MAX_AD_TRIES, ADS_PER_SLOT };
 
 // Check if user can use a specific theme
 export function canUseTheme(theme: ThemeType): { allowed: boolean; reason?: string } {
@@ -65,5 +101,6 @@ export function getRemainingHabitSlots(): number {
   }
 
   const habitsThisMonth = getHabitsCreatedThisMonth();
-  return Math.max(0, FREE_HABIT_LIMIT_PER_MONTH - habitsThisMonth);
+  const totalLimit = getTotalHabitLimit();
+  return Math.max(0, totalLimit - habitsThisMonth);
 }

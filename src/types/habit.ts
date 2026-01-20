@@ -104,7 +104,15 @@ export interface UserPreferences {
   notificationPermissionAsked: boolean;
   // Garden customization
   gardenName?: string;
+  // Ad-earned extra habit slots
+  adEarnedSlots: number; // Number of extra habit slots earned from watching ads
+  adTriesUsed: number; // Number of times user has used the ad option (max 2)
 }
+
+// Maximum times user can use ad option to get extra slots
+export const MAX_AD_TRIES = 2;
+// Number of ads to watch for one extra habit slot
+export const ADS_PER_SLOT = 3;
 
 // Growth stage configuration
 export interface GrowthStage {

@@ -21,13 +21,13 @@ const steps = [
     icon: Sparkles,
   },
   {
-    title: 'Complete Habits, Earn XP',
-    description: 'Each completion makes your character grow and evolve through 8 amazing stages',
+    title: 'Complete Habits, Grow Flowers',
+    description: 'Each completion makes your flower grow and evolve through 8 amazing stages',
     icon: Target,
   },
   {
-    title: 'Build Streaks, Level Up',
-    description: 'Maintain daily streaks for bonus XP and unlock new visual effects',
+    title: 'Build Streaks, Stay Healthy',
+    description: 'Maintain daily streaks to keep your flowers healthy and thriving',
     icon: TrendingUp,
   },
 ];

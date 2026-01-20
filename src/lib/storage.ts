@@ -168,6 +168,8 @@ export const userPrefsStorage = {
       isLoggedIn: false,
       notificationsEnabled: false,
       notificationPermissionAsked: false,
+      adEarnedSlots: 0,
+      adTriesUsed: 0,
     };
 
     return safeJSONParse<UserPreferences>(STORAGE_KEYS.USER_PREFS, defaultPrefs);
