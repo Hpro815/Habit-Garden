@@ -29,11 +29,13 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { AnimatedCharacter } from '@/components/AnimatedCharacter';
 import { PremiumDialog } from '@/components/PremiumDialog';
+import { WatchAdsDialog } from '@/components/WatchAdsDialog';
 import { useCreateHabit, useHabits } from '@/hooks/useHabits';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { canCreateHabit, canUseTheme, getRemainingHabitSlots } from '@/lib/premium';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { canCreateHabit, canUseTheme, getRemainingHabitSlots, canWatchAdsForSlots } from '@/lib/premium';
 import type { ThemeType, FrequencyType } from '@/types/habit';
-import { Crown, Lock, AlertCircle } from 'lucide-react';
+import { Crown, Lock, AlertCircle, Tv } from 'lucide-react';
 
 const habitSchema = z.object({
   name: z.string().min(1, 'Habit name is required').max(50, 'Name too long'),
@@ -94,11 +96,22 @@ export function CreateHabitDialog({ open, onOpenChange }: CreateHabitDialogProps
   const createHabit = useCreateHabit();
   const [previewTheme, setPreviewTheme] = useState<FlowerThemeType>('rose');
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+  const [showAdsDialog, setShowAdsDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isMobile = useIsMobile();
   const isPremium = userPrefs?.isPremium ?? false;
   const remainingSlots = getRemainingHabitSlots();
   const habitCheck = canCreateHabit();
+  const adCheck = canWatchAdsForSlots();
+
+  // Only show ads option on mobile devices
+  const canShowAdsOption = isMobile && adCheck.allowed;
+
+  // Refresh the dialog state when ads dialog completes
+  const handleAdsComplete = () => {
+    setShowAdsDialog(false);
+  };
 
   const form = useForm<HabitFormData>({
     resolver: zodResolver(habitSchema),
@@ -199,17 +212,31 @@ export function CreateHabitDialog({ open, onOpenChange }: CreateHabitDialogProps
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Crown className="text-yellow-600 dark:text-yellow-400" size={20} />
-                <span className="font-semibold text-yellow-900 dark:text-yellow-100">Upgrade to Premium</span>
+                <span className="font-semibold text-yellow-900 dark:text-yellow-100">Need More Habits?</span>
               </div>
               <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">{habitCheck.reason}</p>
-              <Button
-                onClick={() => setShowPremiumDialog(true)}
-                size="sm"
-                className="bg-yellow-600 hover:bg-yellow-700"
-              >
-                <Crown size={16} className="mr-1" />
-                View Premium
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                {/* Watch Ads button - only shown on mobile */}
+                {canShowAdsOption && (
+                  <Button
+                    onClick={() => setShowAdsDialog(true)}
+                    size="sm"
+                    variant="outline"
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/30"
+                  >
+                    <Tv size={16} className="mr-1" />
+                    Watch Ads ({adCheck.triesRemaining} {adCheck.triesRemaining === 1 ? 'try' : 'tries'} left)
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setShowPremiumDialog(true)}
+                  size="sm"
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                >
+                  <Crown size={16} className="mr-1" />
+                  View Premium
+                </Button>
+              </div>
             </div>
           )}
 
@@ -366,6 +393,13 @@ export function CreateHabitDialog({ open, onOpenChange }: CreateHabitDialogProps
 
       {/* Premium Dialog */}
       <PremiumDialog open={showPremiumDialog} onOpenChange={setShowPremiumDialog} />
+
+      {/* Watch Ads Dialog - only used on mobile */}
+      <WatchAdsDialog
+        open={showAdsDialog}
+        onOpenChange={setShowAdsDialog}
+        onComplete={handleAdsComplete}
+      />
     </>
   );
 }

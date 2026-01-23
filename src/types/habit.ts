@@ -112,7 +112,9 @@ export interface UserPreferences {
 // Maximum times user can use ad option to get extra slots
 export const MAX_AD_TRIES = 2;
 // Number of ads to watch for one extra habit slot
-export const ADS_PER_SLOT = 3;
+export const ADS_PER_SLOT = 2;
+// Duration of each ad in seconds
+export const AD_DURATION_SECONDS = 10;
 
 // Growth stage configuration
 export interface GrowthStage {
