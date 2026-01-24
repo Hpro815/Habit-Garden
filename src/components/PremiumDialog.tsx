@@ -133,7 +133,7 @@ export function PremiumDialog({ open, onOpenChange }: PremiumDialogProps) {
               <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                 <li className="flex items-start gap-1 sm:gap-2">
                   <span className="text-gray-400 dark:text-gray-500">✓</span>
-                  <span className="text-gray-900 dark:text-white">All flowers</span>
+                  <span className="text-gray-900 dark:text-white">Limited flowers</span>
                 </li>
                 <li className="flex items-start gap-1 sm:gap-2">
                   <span className="text-gray-400 dark:text-gray-500">✓</span>
@@ -163,6 +163,10 @@ export function PremiumDialog({ open, onOpenChange }: PremiumDialogProps) {
                 <li className="flex items-start gap-1 sm:gap-2">
                   <Check className="text-yellow-600 dark:text-yellow-400 shrink-0" size={12} />
                   <span className="font-medium text-gray-900 dark:text-white">All features</span>
+                </li>
+                <li className="flex items-start gap-1 sm:gap-2">
+                  <Check className="text-yellow-600 dark:text-yellow-400 shrink-0" size={12} />
+                  <span className="font-medium text-gray-900 dark:text-white">No Ads</span>
                 </li>
               </ul>
             </Card>
