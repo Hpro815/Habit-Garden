@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Google AdSense Configuration
 const ADSENSE_CONFIG = {
@@ -16,8 +17,12 @@ declare global {
 export function BannerAd() {
   const adRef = useRef<HTMLModElement>(null);
   const isAdLoaded = useRef(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
+    // Don't load ad on mobile
+    if (isMobile) return;
+
     // Only load ad once
     if (isAdLoaded.current) return;
 
@@ -30,18 +35,23 @@ export function BannerAd() {
     } catch (error) {
       console.error('AdSense error:', error);
     }
-  }, []);
+  }, [isMobile]);
+
+  // Don't render on mobile - removes the bottom space completely
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg">
-      <div className="w-full flex justify-center">
+      <div className="w-full flex justify-center py-2">
         <ins
           ref={adRef}
           className="adsbygoogle"
-          style={{ display: 'block' }}
+          style={{ display: 'block', width: '100%', height: '90px' }}
           data-ad-client={ADSENSE_CONFIG.client}
           data-ad-slot={ADSENSE_CONFIG.slot}
-          data-ad-format="auto"
+          data-ad-format="horizontal"
           data-full-width-responsive="true"
         />
       </div>
