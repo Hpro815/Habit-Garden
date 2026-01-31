@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Crown, User } from 'lucide-react';
+import { Plus, Crown, User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AnimatedCharacter } from '@/components/AnimatedCharacter';
@@ -9,6 +9,8 @@ import { HabitCard } from '@/components/HabitCard';
 import { CreateHabitDialog } from '@/components/CreateHabitDialog';
 import { PremiumDialog } from '@/components/PremiumDialog';
 import { LoginDialog } from '@/components/LoginDialog';
+import { NotificationButton } from '@/components/NotificationButton';
+import { SettingsDialog } from '@/components/SettingsDialog';
 
 export function HabitDashboard() {
   const { data: habits, isLoading } = useHabits();
@@ -16,6 +18,7 @@ export function HabitDashboard() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isPremiumDialogOpen, setIsPremiumDialogOpen] = useState(false);
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
 
   const isPremium = userPrefs?.isPremium ?? false;
   const isLoggedIn = userPrefs?.isLoggedIn ?? false;
@@ -56,6 +59,20 @@ export function HabitDashboard() {
               </p>
             </div>
             <div className="flex gap-2">
+              {/* Settings Button */}
+              <Button
+                onClick={() => setIsSettingsDialogOpen(true)}
+                size="lg"
+                variant="outline"
+                className="gap-2"
+              >
+                <Settings size={20} className="text-gray-600" />
+                <span className="hidden sm:inline">Settings</span>
+              </Button>
+
+              {/* Notification Button - Mobile Only */}
+              <NotificationButton />
+
               {/* Login/Account Button */}
               <Button
                 onClick={() => setIsLoginDialogOpen(true)}
@@ -149,6 +166,12 @@ export function HabitDashboard() {
       <LoginDialog
         open={isLoginDialogOpen}
         onOpenChange={setIsLoginDialogOpen}
+      />
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        open={isSettingsDialogOpen}
+        onOpenChange={setIsSettingsDialogOpen}
       />
     </div>
   );

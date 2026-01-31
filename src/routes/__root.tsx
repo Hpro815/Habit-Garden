@@ -1,5 +1,4 @@
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { BannerAd } from "@/components/BannerAd";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
@@ -9,11 +8,10 @@ export const Route = createRootRoute({
 
 function Root() {
 	return (
-		<div className="flex flex-col min-h-screen">
-			<ErrorBoundary tagName="main" className="flex-1 md:pb-24">
+		<div className="flex flex-col min-h-dvh bg-background">
+			<ErrorBoundary tagName="main" className="flex-1 pb-[env(safe-area-inset-bottom,0px)]">
 				<Outlet />
 			</ErrorBoundary>
-			<BannerAd />
 			<TanStackRouterDevtools position="bottom-right" />
 		</div>
 	);

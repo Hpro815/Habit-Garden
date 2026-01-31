@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,46 @@ const ADMOB_CONFIG = {
   appId: 'ca-app-pub-1715028570954921~7213780530',
   adUnitId: 'ca-app-pub-1715028570954921/1560152691',
 };
+
+// localStorage key for persisting watched ads counter
+const REWARD_ADS_COUNTER_KEY = 'habit_reward_ads_watched';
+
+// Declare Android WebView interface for TypeScript
+declare global {
+  interface Window {
+    AndroidReward?: {
+      showRewardAd: () => void;
+    };
+    // Callback function for Android to call when reward ad completes
+    onHabitRewardGranted?: () => void;
+  }
+}
+
+// Check if running in Android WebView
+function isAndroidWebView(): boolean {
+  return typeof window !== 'undefined' && typeof window.AndroidReward !== 'undefined';
+}
+
+// Get the current watched ads counter from localStorage
+function getStoredAdsWatched(): number {
+  if (typeof window === 'undefined') return 0;
+  const stored = localStorage.getItem(REWARD_ADS_COUNTER_KEY);
+  if (!stored) return 0;
+  const count = parseInt(stored, 10);
+  return isNaN(count) ? 0 : Math.min(count, ADS_PER_SLOT);
+}
+
+// Save the watched ads counter to localStorage
+function setStoredAdsWatched(count: number): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(REWARD_ADS_COUNTER_KEY, Math.min(count, ADS_PER_SLOT).toString());
+}
+
+// Clear the watched ads counter from localStorage
+function clearStoredAdsWatched(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(REWARD_ADS_COUNTER_KEY);
+}
 
 interface WatchAdsDialogProps {
   open: boolean;
@@ -60,7 +100,13 @@ function AdDisplay({ adNumber, timeRemaining }: { adNumber: number; timeRemainin
 }
 
 export function WatchAdsDialog({ open, onOpenChange, onComplete }: WatchAdsDialogProps) {
-  const [adsWatched, setAdsWatched] = useState(0);
+  // Initialize adsWatched from localStorage for mobile app persistence
+  const [adsWatched, setAdsWatched] = useState(() => {
+    if (isAndroidWebView()) {
+      return getStoredAdsWatched();
+    }
+    return 0;
+  });
   const [isWatching, setIsWatching] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(AD_DURATION_SECONDS);
@@ -69,8 +115,60 @@ export function WatchAdsDialog({ open, onOpenChange, onComplete }: WatchAdsDialo
   const progress = (adsWatched / ADS_PER_SLOT) * 100;
   const adProgress = ((AD_DURATION_SECONDS - timeRemaining) / AD_DURATION_SECONDS) * 100;
 
-  // Countdown timer effect
+  // Handler for when Android calls onHabitRewardGranted
+  const handleRewardGranted = useCallback(() => {
+    // Only process on mobile app
+    if (!isAndroidWebView()) return;
+
+    const newCount = Math.min(adsWatched + 1, ADS_PER_SLOT);
+
+    // Update state immediately for UI
+    setAdsWatched(newCount);
+
+    // Persist to localStorage
+    setStoredAdsWatched(newCount);
+
+    if (newCount >= ADS_PER_SLOT) {
+      // All ads watched - grant the slot
+      addAdEarnedSlot();
+      setIsComplete(true);
+      // Clear the counter for next time
+      clearStoredAdsWatched();
+    }
+  }, [adsWatched]);
+
+  // Register callback for Android to call when reward ad completes
+  // Only runs on mobile app (Android WebView)
   useEffect(() => {
+    if (isAndroidWebView()) {
+      window.onHabitRewardGranted = handleRewardGranted;
+
+      return () => {
+        window.onHabitRewardGranted = undefined;
+      };
+    }
+  }, [handleRewardGranted]);
+
+  // Load persisted counter when dialog opens on mobile
+  useEffect(() => {
+    if (open && isAndroidWebView()) {
+      const storedCount = getStoredAdsWatched();
+      setAdsWatched(storedCount);
+
+      // Check if already complete
+      if (storedCount >= ADS_PER_SLOT) {
+        addAdEarnedSlot();
+        setIsComplete(true);
+        clearStoredAdsWatched();
+      }
+    }
+  }, [open]);
+
+  // Countdown timer effect - only for desktop/web simulated ads
+  useEffect(() => {
+    // Don't run timer on Android WebView - native ads handle timing
+    if (isAndroidWebView()) return;
+
     let interval: NodeJS.Timeout | null = null;
 
     if (isWatching && timeRemaining > 0) {
@@ -100,33 +198,20 @@ export function WatchAdsDialog({ open, onOpenChange, onComplete }: WatchAdsDialo
   }, [isWatching, timeRemaining, adsWatched]);
 
   const handleWatchAd = () => {
-    // ========================================================================
-    // FOR REACT NATIVE / MOBILE APPS with AdMob:
-    // ========================================================================
-    // import { RewardedAd, RewardedAdEventType } from 'react-native-google-mobile-ads';
-    //
-    // const rewardedAd = RewardedAd.createForAdRequest(ADMOB_CONFIG.adUnitId, {
-    //   requestNonPersonalizedAdsOnly: true,
-    // });
-    //
-    // rewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
-    //   rewardedAd.show();
-    // });
-    //
-    // rewardedAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
-    //   const newCount = adsWatched + 1;
-    //   setAdsWatched(newCount);
-    //   if (newCount >= ADS_PER_SLOT) {
-    //     addAdEarnedSlot();
-    //     setIsComplete(true);
-    //   }
-    // });
-    //
-    // rewardedAd.load();
-    // return;
-    // ========================================================================
+    // Check if running in Android WebView - call native ad interface
+    if (isAndroidWebView()) {
+      try {
+        window.AndroidReward?.showRewardAd();
+        // The native Android app will handle the ad display
+        // When complete, it calls window.onHabitRewardGranted()
+        return;
+      } catch (error) {
+        console.error('Error calling AndroidReward.showRewardAd():', error);
+        // Fall through to simulated ad if native call fails
+      }
+    }
 
-    // Current implementation: Simulated ad with timer
+    // Web/Desktop: Show simulated ad with timer (no real ads on web)
     setTimeRemaining(AD_DURATION_SECONDS);
     setIsWatching(true);
   };
@@ -134,8 +219,15 @@ export function WatchAdsDialog({ open, onOpenChange, onComplete }: WatchAdsDialo
   const handleClose = () => {
     if (isComplete) {
       onComplete();
+      // Clear counter on successful completion
+      if (isAndroidWebView()) {
+        clearStoredAdsWatched();
+      }
     }
-    setAdsWatched(0);
+    // Reset local state but keep localStorage for mobile persistence
+    if (!isAndroidWebView()) {
+      setAdsWatched(0);
+    }
     setIsComplete(false);
     setIsWatching(false);
     setTimeRemaining(AD_DURATION_SECONDS);
