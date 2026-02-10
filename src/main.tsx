@@ -60,3 +60,38 @@ if (rootElement && !rootElement.innerHTML) {
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// Register service worker for offline support
+if ("serviceWorker" in navigator) {
+	window.addEventListener("load", () => {
+		navigator.serviceWorker
+			.register("/sw.js", { scope: "/" })
+			.then((registration) => {
+				console.log(
+					"✅ Service Worker registered successfully:",
+					registration.scope,
+				);
+
+				// Check for updates on load
+				registration.update();
+
+				// Listen for updates
+				registration.addEventListener("updatefound", () => {
+					const newWorker = registration.installing;
+					if (newWorker) {
+						newWorker.addEventListener("statechange", () => {
+							if (
+								newWorker.state === "installed" &&
+								navigator.serviceWorker.controller
+							) {
+								console.log("🔄 New version available. Refresh to update.");
+							}
+						});
+					}
+				});
+			})
+			.catch((error) => {
+				console.error("❌ Service Worker registration failed:", error);
+			});
+	});
+}
